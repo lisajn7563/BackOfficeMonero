@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Manero_BackOffice", "Manero_BackOffice\Manero_BackOffice\Manero_BackOffice.csproj", "{344ACC9E-BCE5-4D9B-B603-727A4E8E6C22}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Manero_BackOffice.Client", "Manero_BackOffice\Manero_BackOffice.Client\Manero_BackOffice.Client.csproj", "{A656EE92-266C-4856-A5F9-4662C37EC0E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{344ACC9E-BCE5-4D9B-B603-727A4E8E6C22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{344ACC9E-BCE5-4D9B-B603-727A4E8E6C22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{344ACC9E-BCE5-4D9B-B603-727A4E8E6C22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{344ACC9E-BCE5-4D9B-B603-727A4E8E6C22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A656EE92-266C-4856-A5F9-4662C37EC0E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A656EE92-266C-4856-A5F9-4662C37EC0E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A656EE92-266C-4856-A5F9-4662C37EC0E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A656EE92-266C-4856-A5F9-4662C37EC0E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {727E5D29-E330-4242-BE1E-A8432D5E01A1}
+	EndGlobalSection
+EndGlobal

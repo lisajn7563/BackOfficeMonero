@@ -1,0 +1,50 @@
+﻿@page "/users"
+@attribute [StreamRendering]
+@inject HttpClient Http
+
+
+<PageTitle>Users</PageTitle>
+
+
+<AuthorizeView>
+    <Authorized>
+        <div class="users">
+            <h1>USERS</h1>
+
+            @if (users == null)
+            {
+                <div>Loading users...</div>
+            }
+            else
+            {
+                foreach(var user in users) {
+                    <div>@user</div>
+                }
+            }
+
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    private List<User> users = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Http.GetFromJsonAsync<List<User>>("https://usersprovider.azurewebsites.net/api/users") ?? null!;
+    }
+
+    public async Task DeleteUser(string id)
+    {
+        var response = await Http.DeleteAsync($"https://usersprovider.azurewebsites.net/api/users?userId={id}");
+        if (response.IsSuccessStatusCode)
+        {
+            StateHasChanged();
+        }
+    }
+
+    public class User
+    {
+        
+    }
+}

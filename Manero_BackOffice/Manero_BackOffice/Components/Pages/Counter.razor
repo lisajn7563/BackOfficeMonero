@@ -1,0 +1,383 @@
+﻿@page "/products"
+@using Manero_BackOffice.Client.Services
+@using Manero_BackOffice.Client.Services.ViewModel
+@using Manero_BackOffice.Client.Shared.Models
+@using System.Text.Json
+@using System.Text
+@rendermode InteractiveServer
+@inject IBlobStorageService blobStorageService
+@inject HttpClient httpClient
+@inject IJSRuntime jsRuntime
+@inject IWebHostEnvironment env
+
+@* <PageTitle>Products</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="products">
+            <h1>PRODUCTS</h1>
+        </div>
+    </Authorized>
+</AuthorizeView> *@
+
+
+<h1>Product Admin</h1>
+
+<h3>Create Product</h3>
+
+@if (warninngMessage.Length > 0)
+{
+    <div class="alert alert-warning">
+        <strong>Warning!</strong> @warninngMessage.
+    </div>
+}
+
+<h3>@Message</h3>
+
+<h4>File Upload (Azure Blob Storage)</h4>
+<div class="row">
+    <div class="col-sm-6">
+        <label>
+            <InputFile OnChange="OnInputFileChange" />
+        </label>
+        @if (fileLoading)
+        {
+            <i class="fa fa-refresh"></i> <span>Loading...</span>
+        }
+    </div>
+</div>
+@if (displayMessage.Length > 0)
+{
+    <div class="alert alert-success">
+        <strong>Success!</strong> @displayMessage.
+    </div>
+}
+<br />
+
+<section class="create-product">
+
+
+    <EditForm Model="product" FormName="Product" OnSubmit="CreateProduct">
+
+        <label class="form-group" for="categories">Choose a Category:</label>
+
+        <InputSelect class="form-control" @bind-Value="product.Category">
+        {
+            @if (categories != null)
+            {
+                @foreach (var category in categories)
+                {
+                    <option checked="@(product.Category == category.id)" value="@category.id">@category.categoryTitle</option>
+                }
+            }           
+        }
+        </InputSelect>
+        <div class="form-group">
+            <label class="input-label">Title:</label>
+            <InputText class="form-control" @bind-Value="product.Title" />
+        </div>
+        <div class="form-group">
+            <label class="input-label">Batch Number:</label>
+            <InputText class="form-control" @bind-Value="product.BatchNumber" />
+        </div>
+        <div class="form-group">
+            <label class="input-label">image:</label>
+            <InputText class="form-control" disabled @bind-Value="@product.ImageUrl">@blobUrl</InputText>
+        </div>
+        <div class="form-group">
+            <label class="input-label">Original Price:</label>
+            <InputNumber class="form-control" @bind-Value="product.OriginalPrice" />
+        </div>
+        <div class="form-group">
+            <label class="input-label">Discount Price:</label>
+            <InputText class="form-control" @bind-Value="product.DiscountPrice" />
+        </div>
+        <label for="sizes">Choose a Size:</label>
+        <InputSelect class="form-control" @bind-Value="product.Size">
+            @if (sizes != null)
+            {
+                @foreach (var size in sizes)
+                {
+                    <option checked="@(product.Size == size.id)" value="@size.id">@size.sizeTitle</option>
+                }
+            }
+        </InputSelect>
+        <div class="form-group">
+            <label class="input-label">Description:</label>
+            <InputText class="form-control" @bind-Value="product.Description" />
+        </div>
+        <div class="form-group">
+            <label for="colors">Choose a color:</label>
+            <InputSelect class="form-control" @bind-Value="product.Color">
+                @if (colors != null)
+                {
+                    @foreach (var color in colors)
+                    {
+                        <option checked="@(product.Color == color.id)" value="@color.id">@color.colorTitle</option>
+                    }
+                }
+            </InputSelect>
+        </div>
+        <button class="btn btn-primary" type="submit">Skapa produkt</button>
+    </EditForm>
+</section>
+
+<section class="update-product">
+    <h3>Update Product</h3>
+    <EditForm Model="product" FormName="Product-utdate" OnValidSubmit="UpdateProduct">
+        <div class="form-group">
+            <label class="input-label">Id of the Product:</label>
+            <InputText class="form-control" @bind-Value="product.Id"></InputText>
+            <button class="btn btn-primary" type="button" @onclick="FetchProduct">Fetch Product</button>
+        </div>
+        <div class="form-group">
+            <label class="input-label">Title:</label>
+            <InputText class="form-control" @bind-Value="product.Title" />
+        </div>
+        <div class="form-group">
+            <label class="input-label">Batch Number:</label>
+            <InputText class="form-control" @bind-Value="product.BatchNumber" />
+        </div>
+        <div class="form-group">
+            <label class="input-label">image:</label>
+            <InputText class="form-control" @bind-Value="product.ImageUrl" />
+        </div>
+        <div class="form-group">
+            <label class="input-label">Original Price:</label>
+            <InputNumber class="form-control" @bind-Value="product.OriginalPrice" />
+        </div>
+        <div class="form-group">
+            <label class="input-label">Discount Price:</label>
+            <InputText class="form-control" @bind-Value="product.DiscountPrice" />
+        </div>
+        <label for="sizes">Choose a Size:</label>
+        <InputSelect class="form-control" @bind-Value="product.Size">
+            @if (sizes != null)
+            {
+                @foreach (var size in sizes)
+                {
+                    <option value="@size.id">@size.sizeTitle</option>
+                }
+            }
+        </InputSelect>
+        <div class="form-group">
+            <label class="input-label">Description:</label>
+            <InputText class="form-control" @bind-Value="product.Description" />
+        </div>
+        <div class="form-group">
+            <label for="colors">Choose a color:</label>
+            <InputSelect class="form-control" @bind-Value="product.Color">
+                @if (colors != null)
+                {
+                    @foreach (var color in colors)
+                    {
+                        <option value="@color.id">@color.colorTitle</option>
+                    }
+                }
+                }
+            </InputSelect>
+        </div>
+        <button class="btn btn-primary" type="submit">Update Product</button>
+    </EditForm>
+</section>
+
+<section class="delete-product">
+    <h3>Delete product by Id</h3>
+    <EditForm Model="product" FormName="Product-delete" OnSubmit="DeleteProduct">
+        <div class="form-group">
+            <label class="input-label">Id of the Product:</label>
+            <InputText class="form-control" @bind-Value="product.Id"></InputText>
+            <button class="btn btn-primary" type="submit">Delete</button>
+        </div>
+    </EditForm>
+</section>
+
+@code {
+    //FILE UPLOAD
+    private string warninngMessage = "";
+    private string displayMessage = "";
+    private bool fileLoading = false;
+    string Message = "No file(s) selected";
+    IReadOnlyList<IBrowserFile> selectedFiles;
+    private List<FileUploadViewModel> fileUploadViewModels = new List<FileUploadViewModel>();
+    private string blobUrl = "";
+    public ProductRegistration? product { get; set; } = new ProductRegistration();
+
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        fileLoading = true;
+
+        var file = e.File;
+        if (file != null)
+        {
+            try
+            {
+                blobUrl = await blobStorageService.UploadFileToBlobAsync(file.Name, file.ContentType, file.OpenReadStream());
+                displayMessage = $"File uploaded successfully: {blobUrl}";
+                product.ImageUrl = blobUrl;
+            }
+            catch (Exception ex)
+            {
+                displayMessage = $"Error uploading file: {ex.Message}";
+            }
+        }
+        else
+        {
+            displayMessage = "No file selected.";
+        }
+
+        fileLoading = false;
+        this.StateHasChanged();
+    }
+
+    private async void OnUploadSubmit()
+    {
+        fileLoading = true;
+        foreach (var file in selectedFiles)
+        {
+            try
+            {
+                var trustedFileNameForFileStorage = file.Name;
+                var blobUrl = await blobStorageService.UploadFileToBlobAsync(trustedFileNameForFileStorage, file.ContentType, file.OpenReadStream(20971520));
+                if (blobUrl != null)
+                {
+                    FileUploadViewModel fileUploadViewModel = new FileUploadViewModel()
+                        {
+                            FileName = trustedFileNameForFileStorage,
+                            FileStorageUrl = blobUrl,
+                            ContentType = file.ContentType,
+                        };
+
+                    fileUploadViewModels.Add(fileUploadViewModel);
+                    displayMessage = trustedFileNameForFileStorage + " Uploaded!!";
+                }
+                else
+                    warninngMessage = "File Upload failed, Please try again!!";
+
+            }
+            catch (Exception ex)
+            {
+                warninngMessage = "File Upload failed, Please try again!!";
+            }
+        }
+
+        fileLoading = false;
+        this.StateHasChanged();
+    }
+
+    //PRODUCT
+    private List<ProductRegistration> products;
+    private List<Color> colors;
+    private List<Size> sizes;
+    private List<Category> categories;
+
+    private async Task DeleteProduct()
+    {
+        // Skicka en begäran för att radera produkten med den angivna id:n
+        var response = await httpClient.DeleteAsync($"https://hejtest.azurewebsites.net/api/Product/{product.Id}");
+        if (product == null || string.IsNullOrEmpty(product.Id))
+        {
+            Console.WriteLine("No product or invalid id specified.");
+            return;
+        }
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Product with Id {product.Id} deleted");
+        }
+    }
+
+
+    private async Task FetchProduct()
+    {
+        if (string.IsNullOrEmpty(product.Id))
+        {
+            Console.WriteLine("No product id specified.");
+            return;
+        }
+
+        product = await httpClient.GetFromJsonAsync<ProductRegistration>($"https://hejtest.azurewebsites.net/api/Product/{product.Id}");
+
+        if (product != null)
+        {
+            Console.WriteLine($"Product with Id {product.Id} fetched");
+        }
+        else
+        {
+            Console.WriteLine($"Failed to fetch product with Id {product.Id}");
+        }
+    }
+
+
+    private async Task UpdateProduct()
+    {
+        if (string.IsNullOrEmpty(product.Id))
+        {
+            Console.WriteLine("No product or invalid id specified.");
+            return;
+        }
+
+        var content = JsonSerializer.Serialize(product);
+        var jsonContent = new StringContent(content, Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PutAsync($"https://hejtest.azurewebsites.net/api/Product/{product.Id}", jsonContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Product with Id {product.Id} updated successfully");
+        }
+        else
+        {
+            Console.WriteLine($"Failed to update product with Id {product.Id}. Status code: {response.StatusCode}");
+        }
+    }
+
+
+    //[SupplyParameterFromForm]
+    // public ProductRegistration? product { get; set; } = new ProductRegistration();
+
+    private async Task CreateProduct()
+    {
+        var content = JsonSerializer.Serialize(product);
+        var jsonContent = new StringContent(JsonSerializer.Serialize(product), Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PostAsync("https://hejtest.azurewebsites.net/api/Product", jsonContent);
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"new product added: {product.Title}");
+        }
+        else
+        {
+            Console.WriteLine($"something went wrong: {response.StatusCode}");
+
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        colors = await httpClient.GetFromJsonAsync<List<Color>>("https://productcolors.azurewebsites.net/api/Color");
+        sizes = await httpClient.GetFromJsonAsync<List<Size>>("https://productsize.azurewebsites.net/api/Size");
+        categories = await httpClient.GetFromJsonAsync<List<Category>>("https://productcategory.azurewebsites.net/api/Category");
+    }
+}
+
+
+
+@* <PageTitle>Counter</PageTitle>
+     
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
+ *@
